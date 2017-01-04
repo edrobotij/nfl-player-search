@@ -1,9 +1,10 @@
 const gulp = require('gulp'),
       browserify = require('browserify'),
+      babelify = require('babelify'),
       transform = require('vinyl-transform'),
+      source = require('vinyl-source-stream'),
       util = require('gulp-util'),
       sass = require('gulp-sass'),
-      babel = require('gulp-babel'),
       uglify = require('gulp-uglify'),
       uglifyCss = require('gulp-uglifycss'),
       cacheBust = require('gulp-cache-bust'),
@@ -19,18 +20,20 @@ gulp.task('clean', () => {
 });
 
 gulp.task('js', () => {
-  let browserified = transform((filename) => {
-    let b = browserify({entries: filename, debug: true});
-    return b.bundle();
-  });
-
-  return gulp.src('./app/index.js')
-    .pipe(browserified)
-    .pipe(babel({
-      presets: ['es2015']
+  return browserify({
+      entries: './app/index.js',
+      debug: true
+    })
+    .transform(babelify.configure({
+      presets: ['es2015'],
+      ignore: /(node_modules)/
     }))
-    .pipe(uglify())
-    .pipe(gulp.dest('./dist'));
+    .bundle()
+    .on('error', function(error) {
+      console.log("Error: " + error.message);
+    })
+    .pipe(source('app.js'))
+    .pipe(gulp.dest('dist'));
 });
 
 gulp.task('css', () => {
