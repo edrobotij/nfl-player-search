@@ -3,6 +3,7 @@ const gulp = require('gulp'),
       babelify = require('babelify'),
       transform = require('vinyl-transform'),
       source = require('vinyl-source-stream'),
+      buffer = require('vinyl-buffer'),
       util = require('gulp-util'),
       sass = require('gulp-sass'),
       uglify = require('gulp-uglify'),
@@ -33,6 +34,8 @@ gulp.task('js', () => {
       console.log("Error: " + error.message);
     })
     .pipe(source('app.js'))
+    .pipe(buffer())
+    .pipe(uglify())
     .pipe(gulp.dest('dist'));
 });
 
@@ -64,6 +67,14 @@ gulp.task('cacheBust', () => {
     }),
     gulp.dest('./dist')
   ]);
+});
+
+gulp.task('watch', () => {
+  gulp.watch('app/*.js', ['js']);
+  gulp.watch('app/*.scss', ['css']);
+  gulp.watch('app/*.html', () => {
+    seq('html', 'cacheBust');
+  });
 });
 
 gulp.task('default', (cb) => {
