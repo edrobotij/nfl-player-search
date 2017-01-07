@@ -1,4 +1,65 @@
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  font-family: 'Roboto Slab', serif;
+}
+
+html {
+  font-size: 14px;
+  color: #333;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.player-search {
+  padding: 30px;
+  background-color: firebrick;
+  border-radius: 10px;
+  max-height: 107px;
+  width: 350px;
+
+  .search {
+    width: 100%;
+    border: 0;
+    padding: 16px;
+    box-shadow: 0 0 4px #000;
+    outline: none;
+    font-size: 1rem;
+  }
+
+  .results {
+    list-style: none;
+    background-color: white;
+    max-height: 400px;
+    overflow-y: scroll;
+    box-shadow: 0 1px 4px #333;
+
+    li {
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      border-left: 1px solid #ccc;
+      border-right: 1px solid #ccc;
+      font-size: .9rem;
+
+      &:hover {
+        background-color: dodgerblue;
+        color: #fff;
+        cursor: pointer;
+      }
+
+      .match {
+        background-color: gold;
+        color: #333;
+      }
+    }
+  }
 }
