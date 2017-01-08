@@ -27,6 +27,7 @@ let ffrosters = (function() {
   } else {
     console.log('fetching players from storage...');
     players.push(...JSON.parse(localStorage.getItem('players')));
+    console.log('done.');
   }
 
   function findMatches(input, players) {
