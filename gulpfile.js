@@ -9,17 +9,20 @@ const gulp = require('gulp'),
       uglify = require('gulp-uglify'),
       uglifyCss = require('gulp-uglifycss'),
       cacheBust = require('gulp-cache-bust'),
+      reload = require('gulp-livereload'),
       del = require('del'),
       rename = require('gulp-rename'),
       pump = require('pump'),
       seq = require('run-sequence');
 
+// Delete everything in ./dist
 gulp.task('clean', () => {
   del([
     './dist/*.*'
   ]);
 });
 
+// Build js into ./dist
 gulp.task('js', () => {
   return browserify({
       entries: './app/index.js',
@@ -35,10 +38,11 @@ gulp.task('js', () => {
     })
     .pipe(source('app.js'))
     .pipe(buffer())
-    .pipe(uglify())
-    .pipe(gulp.dest('dist'));
+    .pipe(gulp.dest('dist'))
+    .pipe(reload());
 });
 
+// Process sass and uglify css into ./dist
 gulp.task('css', () => {
   pump([
     gulp.src('./app/app.scss'),
@@ -47,10 +51,12 @@ gulp.task('css', () => {
       "maxLineLen": 100,
       "uglyComments": true
     }),
-    gulp.dest('./dist')
+    gulp.dest('./dist'),
+    reload()
   ]);
 });
 
+// Copy index.html to ./dist
 gulp.task('html', () => {
   pump([
     gulp.src('./app/index.html'),
@@ -59,17 +65,24 @@ gulp.task('html', () => {
   ]);
 });
 
+// Cache bust assets with timestamp
 gulp.task('cacheBust', () => {
   pump([
     gulp.src('./dist/*.html'),
     cacheBust({
       type: 'timestamp'
     }),
-    gulp.dest('./dist')
+    gulp.dest('./dist'),
+    reload()
   ]);
 });
 
+// Watch for any file changes and run the associated task
 gulp.task('watch', () => {
+  reload.listen({
+    host: 'ffrosters.dev',
+    port: '9401'
+  });
   gulp.watch('app/*.js', ['js']);
   gulp.watch('app/*.scss', ['css']);
   gulp.watch('app/*.html', () => {
@@ -77,6 +90,7 @@ gulp.task('watch', () => {
   });
 });
 
+// Default build
 gulp.task('default', (cb) => {
   seq('clean', 'html', 'js', 'css', 'cacheBust', cb);
 });

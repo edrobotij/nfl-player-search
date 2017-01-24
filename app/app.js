@@ -1,6 +1,13 @@
 let ffrosters = (function() {
-  const url = 'http://api.fantasy.nfl.com/players/stats?statType=seasonStats&season=2016&format=json';
+  const playersUrl = 'http://api.fantasy.nfl.com/players/stats?statType=seasonStats&season=2016&format=json';
   const players = [];
+  const searchInput = document.querySelector('.search');
+  const results = document.querySelector('.results');
+  const redditPosts = [];
+
+  searchInput.addEventListener('change', displayMatches);
+  searchInput.addEventListener('keyup', displayMatches);
+  results.addEventListener('click', selectPlayer);
 
   // Check for expire timestamp in localStorage.
   if (!localStorage.getItem('expire')) {
@@ -14,7 +21,7 @@ let ffrosters = (function() {
 
   if (!localStorage.getItem('players')) {
     console.log('fetching players from api...')
-    fetch(url)
+    fetch(playersUrl)
       .then(response => {
         if (response.ok) {
           response.json().then(json => {
@@ -44,6 +51,8 @@ let ffrosters = (function() {
     }
 
     if (this.value !== '') {
+      searchInput.blur();
+      searchInput.focus();
       const matchArray = findMatches(this.value, players);
       const html = matchArray.map(player => {
         const regex = new RegExp(this.value, 'ig');
@@ -53,7 +62,7 @@ let ffrosters = (function() {
         const team = player.teamAbbr === '' ? 'FA' : player.teamAbbr;
 
         return `
-          <li>
+          <li data-player-name="${player.name}">
             <span class="name">${playerName}</span>
             <span class="info">${team} &mdash; ${player.position}</span>
           </li>
@@ -64,13 +73,39 @@ let ffrosters = (function() {
     } else {
       results.innerHTML = '';
     }
+
   }
 
-  const searchInput = document.querySelector('.search');
-  const results = document.querySelector('.results');
+  function selectPlayer(e) {
+    searchInput.focus();
+    let playerName;
 
-  searchInput.addEventListener('change', displayMatches);
-  searchInput.addEventListener('keyup', displayMatches);
+    if (e.target.nodeName === 'LI') {
+      playerName = e.target.dataset.playerName;
+    } else if (e.target.parentNode.nodeName === 'LI') {
+      playerName = e.target.parentNode.dataset.playerName;
+    } else if (e.target.parentNode.parentNode.nodeName === 'LI') {
+      playerName = e.target.parentNode.parentNode.dataset.playerName;
+    }
+
+    getRedditPosts(playerName);
+  }
+
+  function getRedditPosts(playerName) {
+    fetch(`https://www.reddit.com/r/fantasyfootball/search.json?q=${playerName}`)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          console.error('getRedditPosts error:\n', response);
+          return null;
+        }
+      })
+      .then(json => {
+        redditPosts.push(...json.data.children);
+      });
+  }
+
 })();
 
 module.exports = ffrosters;
