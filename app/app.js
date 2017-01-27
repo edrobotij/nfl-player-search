@@ -1,9 +1,13 @@
-let ffrosters = (function() {
+const redditService = require('./reddit.service');
+
+const ffrosters = (function() {
   const playersUrl = 'http://api.fantasy.nfl.com/players/stats?statType=seasonStats&season=2016&format=json';
   const players = [];
   const searchInput = document.querySelector('.search');
   const results = document.querySelector('.results');
   const redditPosts = [];
+
+  console.log(redditService);
 
   searchInput.addEventListener('change', displayMatches);
   searchInput.addEventListener('keyup', displayMatches);
@@ -73,7 +77,6 @@ let ffrosters = (function() {
     } else {
       results.innerHTML = '';
     }
-
   }
 
   function selectPlayer(e) {
@@ -88,24 +91,10 @@ let ffrosters = (function() {
       playerName = e.target.parentNode.parentNode.dataset.playerName;
     }
 
-    getRedditPosts(playerName);
+    redditService.getRedditPosts(playerName).then(data => {
+      console.log(data);
+    });
   }
-
-  function getRedditPosts(playerName) {
-    fetch(`https://www.reddit.com/r/fantasyfootball/search.json?q=${playerName}`)
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          console.error('getRedditPosts error:\n', response);
-          return null;
-        }
-      })
-      .then(json => {
-        redditPosts.push(...json.data.children);
-      });
-  }
-
 })();
 
 module.exports = ffrosters;
