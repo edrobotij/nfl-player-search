@@ -1,13 +1,11 @@
-const redditService = require('./reddit.service');
+const redditService = require('./services/reddit.service');
+const nflService = require('./services/nfl.service');
 
 const ffrosters = (function() {
-  const playersUrl = 'http://api.fantasy.nfl.com/players/stats?statType=seasonStats&season=2016&format=json';
   const players = [];
+  const redditPosts = [];
   const searchInput = document.querySelector('.search');
   const results = document.querySelector('.results');
-  const redditPosts = [];
-
-  console.log(redditService);
 
   searchInput.addEventListener('change', displayMatches);
   searchInput.addEventListener('keyup', displayMatches);
@@ -24,17 +22,11 @@ const ffrosters = (function() {
   }
 
   if (!localStorage.getItem('players')) {
-    console.log('fetching players from api...')
-    fetch(playersUrl)
-      .then(response => {
-        if (response.ok) {
-          response.json().then(json => {
-            players.push(...json.players);
-            localStorage.setItem('players', JSON.stringify(players));
-            console.log('done.');
-          });
-        }
-      });
+    console.log('fetching players from api...');
+    nflService.getPlayers().then(data => {
+      players.push(...data.players);
+      console.log('done.');
+    });
   } else {
     console.log('fetching players from storage...');
     players.push(...JSON.parse(localStorage.getItem('players')));

@@ -14,11 +14,12 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
 }
 
 .player-search {
+  position: relative;
+  top: 20%;
   padding: 30px;
   background-color: firebrick;
   border-radius: 10px;
