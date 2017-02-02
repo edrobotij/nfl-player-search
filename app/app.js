@@ -25,11 +25,14 @@ const ffrosters = (function() {
     console.log('fetching players from api...');
     nflService.getPlayers().then(data => {
       players.push(...data.players);
+      localStorage.setItem('players', JSON.stringify(players));
+      console.log(players);
       console.log('done.');
     });
   } else {
     console.log('fetching players from storage...');
     players.push(...JSON.parse(localStorage.getItem('players')));
+    console.log(players);
     console.log('done.');
   }
 
@@ -58,7 +61,7 @@ const ffrosters = (function() {
         const team = player.teamAbbr === '' ? 'FA' : player.teamAbbr;
 
         return `
-          <li data-player-name="${player.name}">
+          <li data-player-name="${player.name}" data-player-id="${player.id}">
             <span class="name">${playerName}</span>
             <span class="info">${team} &mdash; ${player.position}</span>
           </li>
@@ -74,14 +77,22 @@ const ffrosters = (function() {
   function selectPlayer(e) {
     searchInput.focus();
     let playerName;
+    let playerId;
 
     if (e.target.nodeName === 'LI') {
       playerName = e.target.dataset.playerName;
+      playerId = e.target.dataset.playerId;
     } else if (e.target.parentNode.nodeName === 'LI') {
       playerName = e.target.parentNode.dataset.playerName;
+      playerId = e.target.parentNode.dataset.playerId;
     } else if (e.target.parentNode.parentNode.nodeName === 'LI') {
       playerName = e.target.parentNode.parentNode.dataset.playerName;
+      playerId = e.target.parentNode.parentNode.dataset.playerId;
     }
+
+    nflService.getPlayer(playerId).then(data => {
+      console.log(data);
+    });
 
     redditService.getRedditPosts(playerName).then(data => {
       console.log(data);
